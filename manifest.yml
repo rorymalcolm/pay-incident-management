@@ -1,0 +1,11 @@
+---
+applications:
+- name: pay-slack-incident-management
+  buildpacks:
+  - https://github.com/cloudfoundry/nodejs-buildpack.git#v1.7.9
+  health-check-type: http
+  health-check-http-endpoint: '/healthcheck'
+  health-check-invocation-timeout: 5
+  memory: 500M 
+  disk_quota: 1G
+  command: npm start
