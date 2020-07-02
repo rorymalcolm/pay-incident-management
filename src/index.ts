@@ -1,5 +1,4 @@
-import express from "express";
-import { WebClient } from "@slack/web-api";
+import { App, ExpressReceiver, LogLevel } from "@slack/bolt";
 import {
   Blocks,
   MdSection,
@@ -7,73 +6,131 @@ import {
   Actions,
   Button
 } from "@slack-wrench/blocks";
-const app = express();
-const token = process.env.SLACK_API_TOKEN;
+import { getIncidentSummary } from "./post_utils";
+import { IncidentState } from "./types/incident_state";
 
-app.use(express.urlencoded({ extended: true }));
+let incidentState: IncidentState = {
+  commsLead: "",
+  incidentLead: "",
+  incidentTitle: ""
+};
 
-const web = new WebClient(token);
-
-app.get("/healthcheck", (req, res) => {
-  res.sendStatus(200);
+const receiver = new ExpressReceiver({
+  signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-app.post("/buttons", async (req, res) => {
-  const body = await req.body
-  switch (body.payload.actions[0].action_id) {
-    case "incidentLead":
-      web.chat.postMessage({
-        icon_emoji: ":robot:",
-        channel: "govuk-pay-incident",
-        text: "",
-        blocks: Blocks([
-          MdSection(
-            `:hand: @${body.payload.user.username} became the Incident Lead`
-          )
-        ])
-      });
-    case "incidentLead":
-      web.chat.postMessage({
-        icon_emoji: ":robot:",
-        channel: "govuk-pay-incident",
-        text: "",
-        blocks: Blocks([
-          MdSection(
-            `:hand: @${body.payload.user.username} became the Comms Lead`
-          )
-        ])
-      });
-  }
-  res.sendStatus(200);
+const app = new App({
+  token: process.env.SLACK_API_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  receiver,
+  logLevel: LogLevel.DEBUG
 });
 
-app.post("/incident", (req, res) => {
-  web.chat.postMessage({
-    icon_emoji: ":robot:",
-    channel: "govuk-pay-incident",
-    text: "",
-    blocks: Blocks([
-      MdSection(`A new incident \"${req.body.text}\" has been declared!`),
-      Divider(),
-      MdSection("*Incident Lead*"),
-      Actions([
-        Button(":hand: Become Incident Lead", "incidentLead", {
-          value: "incidentLead"
-        })
-      ]),
-      Divider(),
-      MdSection("*Comms Lead*"),
-      Actions([
-        Button(":hand: Become Comms Lead", "commsLead", {
-          value: "commslead"
-        })
+app.command("/incident", async ({ command, ack, say }) => {
+  await ack();
+
+  if (command.text.split(" ")[0] !== "") {
+    const action = command.text.split(" ")[0];
+    switch (action) {
+      case "title":
+        const previousTitle = incidentState.incidentTitle;
+        incidentState.incidentTitle = command.text
+          .split(" ")
+          .slice(1, command.text.split("").length)
+          .reduce((x, y) => {
+            return x + " " + y;
+          });
+        if (previousTitle !== "") {
+          say({
+            icon_emoji: ":robot:",
+            text: `Incident title changed from \"${previousTitle}\" to \"${incidentState.incidentTitle}\"`,
+            channel: "govuk-pay-incident"
+          });
+        } else {
+          say({
+            icon_emoji: ":robot:",
+            text: `Incident title set to \"${incidentState.incidentTitle}\"`,
+            channel: "govuk-pay-incident"
+          });
+        }
+        break;
+      case "summary":
+        say({
+          icon_emoji: ":robot:",
+          text: "",
+          channel: "govuk-pay-incident",
+          blocks: getIncidentSummary(incidentState)
+        });
+        break;  
+    }
+  } else {
+    await say({
+      icon_emoji: ":robot:",
+      text: "",
+      channel: "govuk-pay-incident",
+      blocks: Blocks([
+        MdSection("*pay-incident-management*"),
+        Divider(),
+        incidentState.incidentTitle !== ""
+          ? MdSection(
+              `A new incident \"${incidentState.incidentTitle}\" has been declared!`
+            )
+          : MdSection(`A new incident has been declared!`),
+        Divider(),
+        MdSection("*Incident Lead*"),
+        Actions([
+          Button(":hand: Become Incident Lead", "incidentLead", {
+            value: "incidentLead"
+          })
+        ]),
+        Divider(),
+        MdSection("*Comms Lead*"),
+        Actions([
+          Button(":hand: Become Comms Lead", "commsLead", {
+            value: "commslead"
+          })
+        ])
       ])
-    ])
-  });
+    });
+  }
+});
+
+app.action("commsLead", async ({ body, ack, context }) => {
+  await ack();
+  try {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_API_TOKEN,
+      icon_emoji: ":robot:",
+      text: `<@${body.user.name}> became the comms lead`,
+      channel: "govuk-pay-incident"
+    });
+    incidentState.commsLead = body.user.name;
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+app.action("incidentLead", async ({ body, ack }) => {
+  await ack();
+  try {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_API_TOKEN,
+      icon_emoji: ":robot:",
+      text: `<@${body.user.name}> became the incident lead`,
+      channel: "govuk-pay-incident"
+    });
+    incidentState.incidentLead = body.user.name;
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+receiver.router.get("/healthcheck", (_req, res) => {
   res.sendStatus(200);
 });
 
-app.listen(8080, () => {
-  // tslint:disable-next-line: no-console
-  console.log(`server started at http://localhost:8080`);
-});
+(async () => {
+  await app.start(8080);
+
+  console.log("⚡️ Bolt app is running!");
+})();
