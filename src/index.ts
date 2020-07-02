@@ -1,5 +1,5 @@
 import { App, ExpressReceiver, LogLevel } from "@slack/bolt";
-import { getIncidentSummary, newIncident } from "./post_utils";
+import { getIncidentSummary, newIncident, updateText} from "./post_utils";
 import { IncidentState } from "./types/incident_state";
 
 let incidentState: IncidentState = {
@@ -36,14 +36,16 @@ app.command("/incident", async ({ command, ack, say }) => {
         if (previousTitle !== "") {
           say({
             icon_emoji: ":robot:",
-            text: `Incident title changed from \"${previousTitle}\" to \"${incidentState.incidentTitle}\"`,
+            text: "",
             channel: "govuk-pay-incident",
+            blocks: updateText(`Incident title changed from \"${previousTitle}\" to \"${incidentState.incidentTitle}\"`)
           });
         } else {
           say({
             icon_emoji: ":robot:",
-            text: `Incident title set to \"${incidentState.incidentTitle}\"`,
+            text: "",
             channel: "govuk-pay-incident",
+            blocks: updateText(`Incident title set to \"${incidentState.incidentTitle}\"`)
           });
         }
         break;
@@ -59,8 +61,9 @@ app.command("/incident", async ({ command, ack, say }) => {
         incidentState.priority = parseInt(command.text.split(" ")[1]);
         say({
           icon_emoji: ":robot:",
-          text: `Incident priority set to P${incidentState.priority}`,
+          text: "",
           channel: "govuk-pay-incident",
+          blocks: updateText(`Incident priority set to P${incidentState.priority}`)
         });
         break;
       case "new":

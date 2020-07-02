@@ -77,3 +77,11 @@ export function newIncident(incidentState: IncidentState): KnownBlock[] {
     ]),
   ]);
 }
+
+export function updateText (text: string) : KnownBlock[] {
+    return Blocks([
+        MdSection("*pay-incident-management*"),
+        Divider(),
+        MdSection(text)
+    ]);
+}
