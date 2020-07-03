@@ -4,7 +4,7 @@ import {
   MdSection,
   Divider,
   Actions,
-  Button
+  Button,
 } from "@slack-wrench/blocks";
 import { KnownBlock } from "@slack/web-api";
 
@@ -16,14 +16,14 @@ export function getIncidentSummary(incidentState: IncidentState): KnownBlock[] {
     incidentState.incidentTitle !== ""
       ? MdSection(`Title: \"${incidentState.incidentTitle}\"`)
       : MdSection(
-          "This incident has no title, set one with ```\\incident title [title]```"
+          "This incident has no title, set one with ```/incident title [title]```"
         ),
     Divider(),
     MdSection("*Priority*"),
     incidentState.priority
       ? MdSection(`P${incidentState.priority}`)
       : MdSection(
-          "This incident has no priority, set one with ```\\incident priotity [priority]```"
+          "This incident has no priority, set one with ```/incident priotity [priority]```"
         ),
     Divider(),
     MdSection("*Incident Lead*"),
@@ -31,8 +31,8 @@ export function getIncidentSummary(incidentState: IncidentState): KnownBlock[] {
       ? MdSection(`The incident lead is <@${incidentState.incidentLead}>`)
       : Actions([
           Button(":hand: Become Incident Lead", "incidentLead", {
-            value: "incidentLead"
-          })
+            value: "incidentLead",
+          }),
         ]),
     Divider(),
     MdSection("*Comms Lead*"),
@@ -40,9 +40,9 @@ export function getIncidentSummary(incidentState: IncidentState): KnownBlock[] {
       ? MdSection(`The comms lead is <@${incidentState.commsLead}>`)
       : Actions([
           Button(":hand: Become Comms Lead", "commsLead", {
-            value: "commsLead"
-          })
-        ])
+            value: "commsLead",
+          }),
+        ]),
   ]);
 }
 
@@ -59,22 +59,22 @@ export function newIncident(incidentState: IncidentState): KnownBlock[] {
     incidentState.priority
       ? MdSection(`Priority: ${incidentState.priority}`)
       : MdSection(
-          "This incident has no priority, set one with ```\\incident priotity [priority]```"
+          "This incident has no priority, set one with ```/incident priotity [priority]```"
         ),
     Divider(),
     MdSection("*Incident Lead*"),
     Actions([
       Button(":hand: Become Incident Lead", "incidentLead", {
-        value: "incidentLead"
-      })
+        value: "incidentLead",
+      }),
     ]),
     Divider(),
     MdSection("*Comms Lead*"),
     Actions([
       Button(":hand: Become Comms Lead", "commsLead", {
-        value: "commslead"
-      })
-    ])
+        value: "commslead",
+      }),
+    ]),
   ]);
 }
 
@@ -82,6 +82,6 @@ export function updateText(text: string): KnownBlock[] {
   return Blocks([
     MdSection("*pay-incident-management*"),
     Divider(),
-    MdSection(text)
+    MdSection(text),
   ]);
 }
