@@ -1,7 +1,6 @@
 import { App, ExpressReceiver, LogLevel } from "@slack/bolt";
 import { getIncidentSummary, newIncident, updateText } from "./message_utils";
 import { IncidentState } from "./types/incident_state";
-import { generateIncidentLog } from "./incident_log";
 import moment from "moment";
 import { MessageFetcher } from "./message_fetcher";
 
