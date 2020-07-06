@@ -116,7 +116,7 @@ export class MessageFetcher {
   }
 
   parseMessage(message: any) {
-    return `${moment(message.message.ts * 1000).format('YYYY-MM-DD HH:mm')} - ${
+    return `${moment(message.message.ts * 1000).format("YYYY-MM-DD HH:mm")} - ${
       message.message.blocks[0].elements[0].elements[0].text
     }`;
   }

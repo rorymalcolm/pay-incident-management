@@ -55,6 +55,9 @@ export function newIncident(incidentState: IncidentState): KnownBlock[] {
           `A new incident \"${incidentState.incidentTitle}\" has been declared!`
         )
       : MdSection(`A new incident has been declared!`),
+    MdSection(
+      "This incident has no title, set one with ```/incident title [title]```"
+    ),
     Divider(),
     incidentState.priority
       ? MdSection(`Priority: ${incidentState.priority}`)

@@ -1,5 +1,5 @@
 import { App, ExpressReceiver, LogLevel } from "@slack/bolt";
-import { getIncidentSummary, newIncident, updateText } from "./post_utils";
+import { getIncidentSummary, newIncident, updateText } from "./message_utils";
 import { IncidentState } from "./types/incident_state";
 import { generateIncidentLog } from "./incident_log";
 import moment from "moment";
@@ -107,7 +107,10 @@ app.command("/incident", async ({ command, ack, say }) => {
         messages = messages.filter((x) => {
           return x.reactions.includes("memo");
         });
-        const output = messages.map((x) => messageFetcher.parseMessage(x)).reverse().reduce((x,y) => `${x}\n${y}`);
+        const output = messages
+          .map((x) => messageFetcher.parseMessage(x))
+          .reverse()
+          .reduce((x, y) => `${x}\n${y}`);
         app.client.files.upload({
           token: process.env.SLACK_API_TOKEN,
           content: output,
