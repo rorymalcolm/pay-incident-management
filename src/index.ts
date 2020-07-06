@@ -10,18 +10,18 @@ let incidentState: IncidentState = {
   incidentStartTime: Date.now().toString(),
   commsLead: "",
   incidentLead: "",
-  incidentTitle: "",
+  incidentTitle: ""
 };
 
 const receiver = new ExpressReceiver({
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
 const app = new App({
   token: process.env.SLACK_API_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   receiver,
-  logLevel: LogLevel.DEBUG,
+  logLevel: LogLevel.DEBUG
 });
 
 app.command("/incident", async ({ command, ack, say }) => {
@@ -42,19 +42,19 @@ app.command("/incident", async ({ command, ack, say }) => {
           say({
             icon_emoji: ":robot:",
             text: "",
-            channel: "govuk-pay-incident",
+            channel: process.env.SLACK_CHANNEL_NAME,
             blocks: updateText(
               `Incident title changed from \"${previousTitle}\" to \"${incidentState.incidentTitle}\"`
-            ),
+            )
           });
         } else {
           say({
             icon_emoji: ":robot:",
             text: "",
-            channel: "govuk-pay-incident",
+            channel: process.env.SLACK_CHANNEL_NAME,
             blocks: updateText(
               `Incident title set to \"${incidentState.incidentTitle}\"`
-            ),
+            )
           });
         }
         break;
@@ -62,8 +62,8 @@ app.command("/incident", async ({ command, ack, say }) => {
         say({
           icon_emoji: ":robot:",
           text: "",
-          channel: "govuk-pay-incident",
-          blocks: getIncidentSummary(incidentState),
+          channel: process.env.SLACK_CHANNEL_NAME,
+          blocks: getIncidentSummary(incidentState)
         });
         break;
       case "priority":
@@ -71,10 +71,10 @@ app.command("/incident", async ({ command, ack, say }) => {
         say({
           icon_emoji: ":robot:",
           text: "",
-          channel: "govuk-pay-incident",
+          channel: process.env.SLACK_CHANNEL_NAME,
           blocks: updateText(
             `Incident priority set to P${incidentState.priority}`
-          ),
+          )
         });
         break;
       case "new":
@@ -83,7 +83,7 @@ app.command("/incident", async ({ command, ack, say }) => {
           commsLead: "",
           incidentLead: "",
           incidentTitle: "",
-          eventLog: [],
+          eventLog: []
         };
         if (command.text.split(" ").length >= 2) {
           incidentState.incidentTitle = command.text
@@ -96,18 +96,18 @@ app.command("/incident", async ({ command, ack, say }) => {
         await say({
           icon_emoji: ":robot:",
           text: "",
-          channel: "govuk-pay-incident",
-          blocks: newIncident(incidentState),
+          channel: process.env.SLACK_CHANNEL_NAME,
+          blocks: newIncident(incidentState)
         });
         break;
       case "report":
         let messageFetcher = new MessageFetcher(app, incidentState);
         let messages = await messageFetcher.getMessages();
-        messages = messages.filter((x) => {
+        messages = messages.filter(x => {
           return x.reactions.includes("memo");
         });
         const output = messages
-          .map((x) => messageFetcher.parseMessage(x))
+          .map(x => messageFetcher.parseMessage(x))
           .reverse()
           .reduce((x, y) => `${x}\n${y}`);
         app.client.files.upload({
@@ -120,7 +120,7 @@ app.command("/incident", async ({ command, ack, say }) => {
             incidentState.incidentTitle
           }`,
           filetype: "txt",
-          channels: "govuk-pay-incident",
+          channels: process.env.SLACK_CHANNEL_NAME
         });
         break;
     }
@@ -134,7 +134,7 @@ app.action("commsLead", async ({ body, ack, context }) => {
       token: process.env.SLACK_API_TOKEN,
       icon_emoji: ":robot:",
       text: `<@${body.user.name}> became the comms lead`,
-      channel: "govuk-pay-incident",
+      channel: process.env.SLACK_CHANNEL_NAME
     });
     incidentState.commsLead = body.user.name;
   } catch (error) {
@@ -149,7 +149,7 @@ app.action("incidentLead", async ({ body, ack }) => {
       token: process.env.SLACK_API_TOKEN,
       icon_emoji: ":robot:",
       text: `<@${body.user.name}> became the incident lead`,
-      channel: "govuk-pay-incident",
+      channel: process.env.SLACK_CHANNEL_NAME
     });
     incidentState.incidentLead = body.user.name;
   } catch (error) {
