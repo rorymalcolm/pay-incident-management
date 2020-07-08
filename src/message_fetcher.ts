@@ -24,15 +24,15 @@ export class MessageFetcher {
       let listResponse: ListResponse = await this.app.client.conversations.list(
         {
           token: process.env.SLACK_API_TOKEN,
-          types: "public_channel"
+          types: "public_channel",
         }
       );
       return Promise.resolve(
         listResponse.channels
-          .filter(x => {
+          .filter((x) => {
             return x.name === process.env.SLACK_CHANNEL_NAME;
           })
-          .map(x => x.id)[0]
+          .map((x) => x.id)[0]
       );
     } catch (error) {
       console.error(error);
@@ -50,7 +50,7 @@ export class MessageFetcher {
         limit: 100,
         oldest: (
           parseInt(this.incidentState.incidentStartTime) / 1000
-        ).toString()
+        ).toString(),
       });
       messages = messages.concat(currentMessages.messages);
       if (
@@ -63,7 +63,7 @@ export class MessageFetcher {
             channel: channelId,
             token: process.env.SLACK_API_TOKEN,
             limit: 100,
-            cursor: currentMessages.response_metadata.next_cursor
+            cursor: currentMessages.response_metadata.next_cursor,
           });
           messages = messages.concat(currentMessages.messages);
           if (!currentMessages.response_metadata.next_cursor) {
@@ -72,7 +72,7 @@ export class MessageFetcher {
         }
       }
       return Promise.all(
-        messages.map(async x => await this.mapResponse(x, channelId))
+        messages.map(async (x) => await this.mapResponse(x, channelId))
       );
     } catch (error) {
       console.error(error);
@@ -82,7 +82,7 @@ export class MessageFetcher {
   async mapResponse(message: any, channelId: string) {
     return {
       message: message,
-      reactions: await this.getMessageReaction(message.ts, channelId)
+      reactions: await this.getMessageReaction(message.ts, channelId),
     };
   }
 
@@ -95,7 +95,7 @@ export class MessageFetcher {
         timestamp: timestamp,
         token: process.env.SLACK_API_TOKEN,
         channel: channelId,
-        full: true
+        full: true,
       });
       const reactionsMessage: any = reactions.message;
       if (
