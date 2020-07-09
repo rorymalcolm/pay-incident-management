@@ -34,7 +34,7 @@ cron.schedule("* 10 * * * *", async () => {
       text: "",
       blocks: warnOfStateInconsistencies(incidentState),
       channel: process.env.SLACK_CHANNEL_NAME,
-    });  
+    });
   }
 });
 
