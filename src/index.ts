@@ -27,13 +27,15 @@ const app = new App({
 });
 
 cron.schedule("* 10 * * * *", async () => {
-  await app.client.chat.postMessage({
-    token: process.env.SLACK_API_TOKEN,
-    icon_emoji: ":robot:",
-    text: "",
-    blocks: warnOfStateInconsistencies(incidentState),
-    channel: process.env.SLACK_CHANNEL_NAME,
-  });
+  if (warnOfStateInconsistencies(incidentState)) {
+    await app.client.chat.postMessage({
+      token: process.env.SLACK_API_TOKEN,
+      icon_emoji: ":robot:",
+      text: "",
+      blocks: warnOfStateInconsistencies(incidentState),
+      channel: process.env.SLACK_CHANNEL_NAME,
+    });  
+  }
 });
 
 app.command("/incident", async ({ command, ack, say }) => {

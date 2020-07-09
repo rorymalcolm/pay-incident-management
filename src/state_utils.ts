@@ -41,5 +41,5 @@ export function warnOfStateInconsistencies(
       Divider()
     );
   }
-  return stateWarnings;
+  return stateWarnings.length !== 2 ? null : stateWarnings;
 }
