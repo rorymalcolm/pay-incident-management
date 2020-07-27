@@ -2,7 +2,6 @@ import { IncidentState } from "./types/incident_state";
 import { KnownBlock } from "@slack/types";
 import {
   MdSection,
-  Blocks,
   Divider,
   Button,
   Actions,
@@ -15,6 +14,7 @@ export function warnOfStateInconsistencies(
     MdSection("*pay-incident-management*"),
     Divider(),
   ];
+  console.log(`Current state: ${incidentState}`)
   if (incidentState.commsLead === "") {
     stateWarnings.push(
       MdSection(
@@ -28,7 +28,7 @@ export function warnOfStateInconsistencies(
       Divider()
     );
   }
-  if ((incidentState.incidentLead = "")) {
+  if ((incidentState.incidentLead === "")) {
     stateWarnings.push(
       MdSection(
         "This incident has no incident lead, you should assign one to coordinate the technical response."
@@ -41,5 +41,6 @@ export function warnOfStateInconsistencies(
       Divider()
     );
   }
-  return stateWarnings.length !== 2 ? null : stateWarnings;
+  console.log(`state warnings: ${JSON.stringify(stateWarnings)}`)
+  return stateWarnings.length !== 2 ? stateWarnings : null;
 }

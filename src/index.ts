@@ -26,7 +26,9 @@ const app = new App({
   logLevel: LogLevel.DEBUG,
 });
 
-cron.schedule("* 10 * * * *", async () => {
+cron.schedule("30 * * * * *", async () => {
+  console.log('hit')
+  try {
   if (warnOfStateInconsistencies(incidentState)) {
     await app.client.chat.postMessage({
       token: process.env.SLACK_API_TOKEN,
@@ -35,6 +37,9 @@ cron.schedule("* 10 * * * *", async () => {
       blocks: warnOfStateInconsistencies(incidentState),
       channel: process.env.SLACK_CHANNEL_NAME,
     });
+  }
+  } catch (e) {
+    console.error(e)
   }
 });
 
