@@ -14,7 +14,6 @@ export function warnOfStateInconsistencies(
     MdSection("*pay-incident-management*"),
     Divider(),
   ];
-  console.log(`Current state: ${incidentState}`)
   if (incidentState.commsLead === "") {
     stateWarnings.push(
       MdSection(
@@ -41,6 +40,5 @@ export function warnOfStateInconsistencies(
       Divider()
     );
   }
-  console.log(`state warnings: ${JSON.stringify(stateWarnings)}`)
   return stateWarnings.length !== 2 ? stateWarnings : null;
 }

@@ -27,7 +27,6 @@ const app = new App({
 });
 
 cron.schedule("30 * * * * *", async () => {
-  console.log('hit')
   try {
   if (warnOfStateInconsistencies(incidentState)) {
     await app.client.chat.postMessage({
